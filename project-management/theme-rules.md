@@ -1,13 +1,13 @@
 # Theme Rules · Modern Minimalist
 
 > A single source of truth for **colours, typography, spacing, and visual tokens** used across the application.
-> Implemented via Tailwind CSS 3.4 design tokens (`tailwind.config.ts`).
+> Implemented via Tailwind CSS v4.1.10 design tokens (`tailwind.config.ts`).
 
 ---
 
 ## 1 · Colour Palette
 
-### Current Implementation (Tailwind CSS 3.4)
+### Current Implementation (Tailwind CSS v4.1.10)
 
 | Token | HEX | Usage | Tailwind Class |
 |-------|-----|-------|----------------|
@@ -89,7 +89,7 @@ fontFamily: {
 
 ## 3 · Spacing & Sizing Scale
 
-### Tailwind CSS Default Scale (Current)
+### Tailwind CSS v4 Default Scale (Current)
 ```
 0   | 0
 1   | 0.25rem (4px)
@@ -215,7 +215,7 @@ animation: {
 
 ## 8 · Responsive Breakpoints
 
-### Tailwind CSS Default Breakpoints
+### Tailwind CSS v4 Default Breakpoints
 ```
 sm:  640px  – Small tablets/large phones
 md:  768px  – Tablets
@@ -231,4 +231,4 @@ xl:  1280px – Desktop
 
 ---
 
-> This theme system is implemented and working with Tailwind CSS 3.4. All colors, spacing, and typography follow Tailwind's proven conventions while maintaining our design goals.
+> This theme system is implemented and working with Tailwind CSS v4.1.10. All colors, spacing, and typography follow Tailwind's proven conventions while maintaining our design goals.

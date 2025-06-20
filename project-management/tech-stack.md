@@ -41,7 +41,7 @@
 - Use `defineConfig({ server: { open: true, fs: { strict: true }}})` to avoid accidental FS leaks.
 - Common pitfall: large vendor chunks—add `build.rollupOptions.output.manualChunks` to split TipTap + Monaco (if added) into async chunks.
 
-**Tailwind CSS 3.4**
+**Tailwind CSS 4.1**
 - Keep the **token-based colour palette** in a central `theme` object; never hard-code brand colours inside components.
 - Purge/`content` paths must include the TipTap menu if it injects HTML strings.
 - Use the `@apply` directive in component-level `.css`/`.scss` only for frequently reused utility clusters; over-using `@apply` negates Tailwind's purpose.
@@ -115,6 +115,7 @@
 * **Prettier** 3.5.3 – code formatting.
 * **Vitest** 3.2.4 & **@vitest/ui** 3.2.4 – testing framework.
 * **Supabase CLI** 1.129.x – local DB & Edge Function emulation.
+* **Supabase JS SDK** 2.50.0 – client library for database and auth operations.
 
 ---
 

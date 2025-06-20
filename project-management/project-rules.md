@@ -10,46 +10,68 @@
 root
 ├─ app/                     # Vite + React front-end
 │  ├─ src/
-│  │  ├─ components/        # Presentational UI components with colocated tests
-│  │  │   ├─ Button.tsx
-│  │  │   └─ Button.spec.tsx
-│  │  ├─ features/          # Feature folders (editor, auth, docs)
-│  │  │   └─ editor/
-│  │  │       ├─ Editor.tsx
-│  │  │       ├─ Editor.spec.tsx
-│  │  │       ├─ hooks/
-│  │  │       └─ api/
-│  │  ├─ hooks/             # Reusable generic hooks (e.g., useDebounce)
-│  │  ├─ stores/            # Zustand slices, each in its own file
-│  │  ├─ utils/             # Pure helper functions (no React)
-│  │  ├─ types/             # Global TS types & interfaces
-│  │  ├─ styles/            # Tailwind config extensions & CSS modules
-│  │  ├─ test/              # Test utilities and setup
-│  │  └─ main.tsx           # App entry (Vite convention)
-│  ├─ public/               # Static assets served as-is
-│  └─ tailwind.config.ts    # Theme tokens (see theme-rules.md)
+│  │  ├─ features/          # Feature folders with modular components
+│  │  │   ├─ auth/          # Authentication feature
+│  │  │   │   ├─ hooks/
+│  │  │   │   └─ ...
+│  │  │   ├─ documents/     # Document management feature
+│  │  │   │   ├─ components/    # Document-specific components
+│  │  │   │   ├─ hooks/
+│  │  │   │   ├─ services/
+│  │  │   │   ├─ stores/
+│  │  │   │   └─ ...
+│  │  │   ├─ editor/        # Rich text editor feature
+│  │  │   │   ├─ components/    # Editor-specific components
+│  │  │   │   ├─ extensions/
+│  │  │   │   ├─ hooks/
+│  │  │   │   ├─ services/
+│  │  │   │   ├─ stores/
+│  │  │   │   └─ ...
+│  │  │   ├─ suggestions/   # AI suggestions feature
+│  │  │   │   ├─ components/
+│  │  │   │   ├─ hooks/
+│  │  │   │   ├─ services/
+│  │  │   │   ├─ stores/
+│  │  │   │   └─ ...
+│  │  │   └─ marketing/     # Landing page feature
+│  │  │       └─ ...
+│  │  ├─ shared/            # Shared/reusable components
+│  │  │   ├─ components/
+│  │  │   │   └─ layout/
+│  │  │   └─ hooks/         # Generic hooks (e.g., useDebounce)
+│  │  ├─ lib/              # External library configurations
+│  │  ├─ utils/            # Pure helper functions (no React)
+│  │  ├─ types/            # Global TS types & interfaces
+│  │  ├─ styles/           # Tailwind config extensions & CSS modules
+│  │  ├─ workers/          # Web Workers (spell check, etc.)
+│  │  ├─ test/             # Test utilities and setup
+│  │  └─ main.tsx          # App entry (Vite convention)
+│  ├─ public/              # Static assets served as-is
+│  └─ tailwind.config.ts   # Theme tokens (see theme-rules.md)
 │
-├─ supabase/                # Backend infrastructure
-│  ├─ migrations/           # SQL migration scripts (timestamp-prefixed)
-│  └─ functions/            # Edge Functions (one folder per function)
+├─ supabase/               # Backend infrastructure
+│  ├─ migrations/          # SQL migration scripts (timestamp-prefixed)
+│  └─ functions/           # Edge Functions (one folder per function)
 │      └─ suggest-rewrite/
 │          └─ index.ts
 │
-├─ tests/                   # End-to-end tests (separate from unit tests)
-│  └─ e2e/                  # Playwright spec files for integration testing
+├─ tests/                  # End-to-end tests (separate from unit tests)
+│  └─ e2e/                 # Playwright spec files for integration testing
 │
-├─ project-management/      # Docs (this folder)
-│  └─ *.md                  # Overview, flows, rules
+├─ project-management/     # Docs (this folder)
+│  └─ *.md                 # Overview, flows, rules
 │
-├─ .github/                 # GitHub workflows, issue/PR templates
-└─ package.json             # NPM workspace configuration
+├─ .github/                # GitHub workflows, issue/PR templates
+└─ package.json            # NPM workspace configuration
 ```
 
 ### Folder Guidelines
-1. **Feature-first** at `src/features/*` — each feature owns its child components, hooks, and api files to keep boundaries clear.
-2. **Absolute Imports** via TS path alias: `@/features/editor/Editor`.
-3. **Hybrid Testing** — Unit tests colocated with components (`*.spec.tsx`), E2E tests in dedicated `/tests/e2e/` directory.
-4. **Edge Functions** live under `supabase/functions/<name>/index.ts` to avoid bundle-size collisions.
+1. **Feature-first** at `src/features/*` — each feature owns its child components, hooks, services, stores, and api files to keep boundaries clear.
+2. **Modular Components** — each feature has a `components/` directory for feature-specific UI components with proper separation of concerns.
+3. **Absolute Imports** via TS path alias: `@/features/editor/Editor`, `@/shared/components/layout/AppLayout`.
+4. **Hybrid Testing** — Unit tests colocated with components (`*.spec.tsx`), E2E tests in dedicated `/tests/e2e/` directory.
+5. **Edge Functions** live under `supabase/functions/<name>/index.ts` to avoid bundle-size collisions.
+6. **Shared Resources** — reusable components, hooks, and utilities in `shared/` for cross-feature use.
 
 ---
 
@@ -135,6 +157,15 @@ Use ESLint plugin **import/order** with the above groups.
 
 - Enforced via **eslint-plugin-jsx-a11y** & automated Lighthouse CI.
 - No failing a11y rules allowed on PR merge.
+
+---
+
+## 10 · Data Models & Migrations
+
+1. **Single Source of Truth** — The file `project-management/data-models.md` **is** the canonical specification for all database tables, columns, and policies in Phase 1.  Any migration affecting the schema **must** be reflected in that markdown file in the same PR.
+2. **Migration Ordering** — Timestamp-prefixed SQL files under `supabase/migrations/` remain the executable history.  Keep them atomic and reversible when possible.
+3. **RLS Policies** — If you add or modify a table, include Row-Level Security in both the migration *and* the markdown spec.
+4. **Supabase Type Generation** — After schema changes run `npx supabase gen types typescript --linked` so the front-end gets updated types.
 
 ---
 

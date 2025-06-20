@@ -32,9 +32,9 @@
 5. Add logout button in sidebar.
 
 ### 2 · Document Management
-1. SQL migration: `documents(id, owner, title, content, updated_at)`.
-2. Implement RLS: owner can `select`, `update`, `delete` own rows.
-3. `useDocs` Zustand slice: `docs`, `createDoc`, `updateDoc`.
+1. SQL migration: `documents(user_id, number, title, content, reference_numbers, created_at, updated_at)` with composite PK and full RLS policies.
+2. Document operations library: Complete CRUD in `app/src/lib/documents.ts` with helper functions for search, references, and user-scoped operations.
+3. `useDocuments` Zustand slice: `docs`, `createDoc`, `updateDoc`, `deleteDoc`, `searchDocs`.
 4. Sidebar component with search + new button.
 5. Delete & rename via context menu.
 
@@ -48,9 +48,7 @@
 ### 4 · Autosave & Persistence
 1. In `useDocs` slice, debounce `updateDoc` 3 s idle.
 2. Show "Saving…/Saved" status by doc title.
-3. Implement offline draft in `localStorage` fallback.
-4. Restore on reconnect.
-5. Unit tests for debounce logic.
+3. Unit tests for debounce logic.
 
 ### 5 · Readability Indicator
 1. Compute word/char count in editor callback.

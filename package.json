@@ -19,7 +19,17 @@
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "keywords": ["writing-assistant", "ai", "grammarly-clone", "text-editor"],
+  "keywords": [
+    "writing-assistant",
+    "ai",
+    "grammarly-clone",
+    "text-editor"
+  ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "dictionary-en-us": "^2.2.1",
+    "nspell": "^2.1.5",
+    "write-good": "^1.0.8"
+  }
 }

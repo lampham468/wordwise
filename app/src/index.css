@@ -5,13 +5,8 @@
 
 @import "tailwindcss";
 
+/* Theme configuration for custom colors */
 @theme {
-  /* Custom dimensions */
-  --editor-max-width: 800px;
-  --sidebar-width: 280px;
-  --toolbar-height: 60px;
-
-  /* Primary brand colors */
   --color-primary-50: #f0f9ff;
   --color-primary-100: #e0f2fe;
   --color-primary-200: #bae6fd;
@@ -23,8 +18,7 @@
   --color-primary-800: #075985;
   --color-primary-900: #0c4a6e;
   --color-primary-950: #082f49;
-
-  /* Neutral colors */
+  
   --color-neutral-50: #fafafa;
   --color-neutral-100: #f5f5f5;
   --color-neutral-200: #e5e5e5;
@@ -36,50 +30,46 @@
   --color-neutral-800: #262626;
   --color-neutral-900: #171717;
   --color-neutral-950: #0a0a0a;
-
-  /* Semantic colors */
+  
   --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #86efac;
+  --color-success-400: #4ade80;
   --color-success-500: #22c55e;
   --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+  --color-success-900: #14532d;
+  
   --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-200: #fde68a;
+  --color-warning-300: #fcd34d;
+  --color-warning-400: #fbbf24;
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+  --color-warning-800: #92400e;
+  --color-warning-900: #78350f;
+  
   --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-200: #fecaca;
+  --color-error-300: #fca5a5;
+  --color-error-400: #f87171;
   --color-error-500: #ef4444;
   --color-error-600: #dc2626;
-
-  /* Typography */
-  --font-family-sans: 'Inter', system-ui, sans-serif;
-  --font-family-mono: 'JetBrains Mono', 'Consolas', monospace;
-
-  /* Custom spacing */
-  --spacing-18: 4.5rem;
-  --spacing-88: 22rem;
-
-  /* Max widths */
-  --max-width-prose: 65ch;
-  --max-width-editor: 800px;
-
-  /* Animations */
-  --animate-fade-in: fadeIn 0.15s ease-in-out;
-  --animate-slide-in: slideIn 0.2s ease-out;
-  --animate-pulse-subtle: pulseSubtle 2s ease-in-out infinite;
+  --color-error-700: #b91c1c;
+  --color-error-800: #991b1b;
+  --color-error-900: #7f1d1d;
 }
 
-/* Keyframe definitions */
-@keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes slideIn {
-  0% { transform: translateY(-4px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes pulseSubtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+/* Layout constants for component sizing */
+:root {
+  --editor-max-width: 800px;
+  --sidebar-width: 280px;
+  --toolbar-height: 60px;
 }
 
 /* Base styles */
@@ -88,11 +78,6 @@
 }
 
 html {
-  font-family: 'Inter', system-ui, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light;
-  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -101,17 +86,13 @@ html {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #fafafa;
-  color: #171717;
 }
 
 /* Focus styles for accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-primary-500);
+  outline: 2px solid theme('colors.primary.500');
   outline-offset: 2px;
 }
 
@@ -133,20 +114,22 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-neutral-100;
+  background-color: theme('colors.neutral.100');
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-neutral-300 rounded;
+  background-color: theme('colors.neutral.300');
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-neutral-400;
+  background-color: theme('colors.neutral.400');
 }
 
 /* Selection styling */
 ::selection {
-  @apply bg-primary-200 text-primary-900;
+  background-color: theme('colors.primary.200');
+  color: theme('colors.primary.800');
 }
 
 /* Typography improvements */
@@ -167,9 +150,6 @@ button {
   font-size: inherit;
   line-height: inherit;
   margin: 0;
-  padding: 0;
-  border: none;
-  background: none;
   cursor: pointer;
 }
 
@@ -204,15 +184,173 @@ a {
   height: var(--toolbar-height);
 }
 
-/* Spell check underlines */
+/* Modern UI Components */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dramatic Pop-Out Effect Utility */
+.dramatic-popup {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 15px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) translateZ(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dramatic-popup:hover {
+  box-shadow: 0 45px 80px -12px rgba(0, 0, 0, 0.35), 0 20px 35px -5px rgba(0, 0, 0, 0.25), 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px) translateZ(0) scale(1.02);
+}
+
+.sleek-card {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  /* Dramatic pop-out effect - always active */
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 15px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) translateZ(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sleek-card:hover {
+  /* Even more dramatic on hover */
+  box-shadow: 0 45px 80px -12px rgba(0, 0, 0, 0.35), 0 20px 35px -5px rgba(0, 0, 0, 0.25), 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px) translateZ(0) scale(1.02);
+}
+
+/* Editor-specific card - dramatic effect but no hover to avoid distraction while writing */
+.editor-card {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  /* Dramatic pop-out effect - always active, no hover */
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 15px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) translateZ(0);
+  transition: none; /* No transitions to avoid any movement while typing */
+}
+
+.sleek-button {
+  background: linear-gradient(145deg, theme('colors.primary.500'), theme('colors.primary.600'));
+  border: none;
+  /* Dramatic pop-out effect - always active */
+  box-shadow: 0 35px 60px -12px rgba(14, 165, 233, 0.4), 0 15px 25px -5px rgba(14, 165, 233, 0.3), 0 8px 16px -8px rgba(14, 165, 233, 0.2);
+  transform: translateY(-4px) translateZ(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sleek-button:hover {
+  /* Even more dramatic on hover */
+  box-shadow: 0 45px 80px -12px rgba(14, 165, 233, 0.5), 0 20px 35px -5px rgba(14, 165, 233, 0.4), 0 12px 24px -8px rgba(14, 165, 233, 0.3);
+  transform: translateY(-8px) translateZ(0) scale(1.05);
+}
+
+.sleek-button:active {
+  transform: translateY(-2px) translateZ(0) scale(0.98);
+  box-shadow: 0 25px 40px -12px rgba(14, 165, 233, 0.35), 0 10px 20px -5px rgba(14, 165, 233, 0.25), 0 6px 12px -8px rgba(14, 165, 233, 0.15);
+}
+
+.modern-input {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(5px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modern-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: theme('colors.primary.400');
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* TipTap Editor Styles - using theme colors */
+.ProseMirror {
+  outline: none;
+  font-family: theme('fontFamily.sans');
+  font-size: 16px;
+  line-height: 1.6;
+  color: theme('colors.neutral.900');
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: theme('colors.neutral.400');
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  line-height: 1.2;
+  color: theme('colors.neutral.900');
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem 0;
+  line-height: 1.3;
+  color: theme('colors.neutral.900');
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.4;
+  color: theme('colors.neutral.900');
+}
+
+.ProseMirror ul, .ProseMirror ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid theme('colors.neutral.300');
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: theme('colors.neutral.600');
+}
+
+.ProseMirror code {
+  background-color: theme('colors.neutral.100');
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: theme('fontFamily.mono');
+  font-size: 0.875rem;
+  color: theme('colors.neutral.800');
+}
+
+.ProseMirror pre {
+  background-color: theme('colors.neutral.100');
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Spell check underlines - following theme-rules.md patterns */
 .spell-error {
-  border-bottom: 2px wavy var(--color-error-500);
+  border-bottom: 2px wavy theme('colors.error.500');
 }
 
 .grammar-error {
-  border-bottom: 2px dashed var(--color-warning-500);
+  border-bottom: 2px dashed theme('colors.warning.500');
 }
 
 .style-suggestion {
-  border-bottom: 2px dotted var(--color-primary-500);
+  border-bottom: 2px dotted theme('colors.primary.500');
 }
