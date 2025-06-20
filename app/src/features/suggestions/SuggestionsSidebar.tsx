@@ -79,7 +79,7 @@ export function SuggestionsSidebar() {
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-2 text-xs font-medium rounded-xl transition-all duration-200 ${
                 activeTab === tab.id
-                  ? 'sleek-card bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
                   : 'bg-white/40 text-neutral-600 hover:bg-white/60 hover:shadow-soft'
               }`}
             >

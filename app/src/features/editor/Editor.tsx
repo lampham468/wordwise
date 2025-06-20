@@ -8,6 +8,7 @@
 import { DocumentHeader } from './components/DocumentHeader';
 import { EditorContent } from './components/EditorContent';
 import { useEditorCrossStore } from './hooks/useEditorCrossStore';
+import { useGrammarAnalysis } from '@/features/suggestions/hooks/useGrammarAnalysis';
 
 /**
  * Main editor component that encapsulates document title and content editing
@@ -15,7 +16,10 @@ import { useEditorCrossStore } from './hooks/useEditorCrossStore';
  */
 export function Editor() {
   // Initialize cross-store communication and autosave
-  useEditorCrossStore();
+  const { content } = useEditorCrossStore();
+  
+  // Initialize grammar analysis
+  useGrammarAnalysis(content);
   
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">

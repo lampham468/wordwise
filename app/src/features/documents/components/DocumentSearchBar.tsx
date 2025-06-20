@@ -121,7 +121,7 @@ export function DocumentSearchBar({
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             onBlur={handleCollapse}
-            placeholder="Search..."
+            placeholder={placeholder}
             disabled={disabled}
             className="modern-input w-full h-12 px-4 pl-14 pr-12 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
             aria-label="Search documents"
