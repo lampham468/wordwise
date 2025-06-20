@@ -1,0 +1,12 @@
+diff --git a/node_modules/passive-voice/passive.js b/node_modules/passive-voice/passive.js
+index b6cf09a..c651bc9 100644
+--- a/node_modules/passive-voice/passive.js
++++ b/node_modules/passive-voice/passive.js
+@@ -188,6 +188,7 @@ module.exports = function (text, options) {
+           (byRe || constructByRe()) : re; // not sorry
+ 
+   var suggestions = [];
++  var match;
+   while (match = r.exec(text)) {
+     if (exceptions.indexOf(match[2].toLowerCase()) === -1) {
+       suggestions.push({

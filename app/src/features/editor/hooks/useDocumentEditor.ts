@@ -41,7 +41,7 @@ export function useDocumentEditor() {
     setTitle(newTitle);
   }, [setTitle]);
 
-  // Calculate stats from current content
+  // Calculate comprehensive stats from current content
   const stats: TextStats = useCallback(() => {
     if (!content) {
       return {
@@ -55,7 +55,7 @@ export function useDocumentEditor() {
     return {
       wordCount: analysis.words,
       charCount: analysis.characters,
-      readabilityScore: 0, // TODO: Implement readability scoring
+      readabilityScore: analysis.readabilityScore,
     };
   }, [content])();
 

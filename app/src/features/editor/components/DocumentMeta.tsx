@@ -5,7 +5,9 @@
  * Provides visual feedback for save states and document metrics.
  */
 
+import { useMemo } from 'react';
 import { useEditorStore } from '../stores/editor.store';
+import { getReadabilityLevel } from '@/utils/text-analysis';
 import type { DocumentStats, SaveStatus } from '@/types/supabase';
 
 interface DocumentMetaProps {
@@ -14,17 +16,18 @@ interface DocumentMetaProps {
 }
 
 /**
- * Get readability score color and label using theme colors
+ * Map readability color to Tailwind classes
  */
-function getReadabilityInfo(score: number) {
-  if (score >= 70) {
-    return { color: 'text-success-600', label: 'Easy' };
-  } else if (score >= 50) {
-    return { color: 'text-warning-600', label: 'Moderate' };
-  } else if (score >= 30) {
-    return { color: 'text-warning-600', label: 'Difficult' };
-  } else {
-    return { color: 'text-error-600', label: 'Very Difficult' };
+function getReadabilityColorClass(color: 'success' | 'warning' | 'error' | 'neutral'): string {
+  switch (color) {
+    case 'success':
+      return 'text-success-600';
+    case 'warning':
+      return 'text-warning-600';
+    case 'error':
+      return 'text-error-600';
+    default:
+      return 'text-neutral-600';
   }
 }
 
@@ -33,8 +36,17 @@ function getReadabilityInfo(score: number) {
  * Shows save status, word count, character count, and readability score
  */
 export function DocumentMeta({ saveStatus, stats }: DocumentMetaProps) {
-  const { saveError, clearSaveError } = useEditorStore();
-  const readabilityInfo = getReadabilityInfo(stats.readabilityScore || 0);
+  const { saveError, clearSaveError, content } = useEditorStore();
+  
+  // Get detailed readability analysis
+  const readabilityAnalysis = useMemo(() => {
+    if (!content || stats.readabilityScore === undefined) {
+      return getReadabilityLevel(0);
+    }
+    return getReadabilityLevel(stats.readabilityScore);
+  }, [content, stats.readabilityScore]);
+
+  const readabilityColorClass = getReadabilityColorClass(readabilityAnalysis.color);
 
   const getSaveStatusDisplay = () => {
     switch (saveStatus) {
@@ -105,11 +117,14 @@ export function DocumentMeta({ saveStatus, stats }: DocumentMetaProps) {
         <span>{stats.wordCount} {stats.wordCount === 1 ? 'word' : 'words'}</span>
         <span>{stats.charCount} {stats.charCount === 1 ? 'character' : 'characters'}</span>
         
-        {/* Readability Score */}
+        {/* Enhanced Readability Score */}
         <div className="flex items-center space-x-1">
-          <span className="text-neutral-500">Readability:</span>
-          <span className={`font-medium ${readabilityInfo.color}`}>
-            {stats.readabilityScore} ({readabilityInfo.label})
+          <span className="text-neutral-500">Grade Level:</span>
+          <span 
+            className={`font-medium ${readabilityColorClass}`}
+            title={`Flesch-Kincaid Grade Level: ${stats.readabilityScore || 0} (${readabilityAnalysis.description})`}
+          >
+            {stats.readabilityScore ? stats.readabilityScore.toFixed(1) : '0.0'} ({readabilityAnalysis.level})
           </span>
         </div>
       </div>

@@ -9,53 +9,74 @@
 import nspell from 'nspell';
 
 let spell: ReturnType<typeof nspell> | null = null;
-let isLoading = false;
+let loadPromise: Promise<void> | null = null;
+
+console.log('🔧 Spell worker started');
 
 /**
  * Load dictionary files from public directory
  */
 async function loadDictionary(): Promise<void> {
-  if (isLoading || spell !== null) {
+  // If already loaded, return immediately
+  if (spell !== null) {
+    console.log('✅ Dictionary already loaded');
     return;
   }
   
-  isLoading = true;
-  
-  try {
-    // Load dictionary files from public directory
-    // These files are served as static assets and are accessible via HTTP
-    const [affResponse, dicResponse] = await Promise.all([
-      fetch('/dictionaries/en_US.aff'),
-      fetch('/dictionaries/en_US.dic')
-    ]);
-    
-    if (!affResponse.ok || !dicResponse.ok) {
-      throw new Error('Failed to load dictionary files');
-    }
-    
-    const affContent = await affResponse.text();
-    const dicContent = await dicResponse.text();
-    
-    // Create spell checker with dictionary data
-    spell = nspell(affContent, dicContent);
-    
-    // Send ready message to main thread
-    self.postMessage({
-      type: 'ready',
-      message: 'Spell checker initialized successfully'
-    });
-    
-  } catch (error) {
-    console.error('Failed to load dictionary:', error);
-    
-    // Send error message to main thread
-    self.postMessage({
-      type: 'error',
-      message: `Failed to initialize spell checker: ${error instanceof Error ? error.message : 'Unknown error'}`
-    });
-  } finally {
-    isLoading = false;
+  // If currently loading, wait for that to complete
+  if (loadPromise) {
+    console.log('⏳ Waiting for dictionary to load...');
+    return loadPromise;
   }
+  
+  // Start loading
+  console.log('🔧 Loading dictionary files...');
+  
+  loadPromise = (async () => {
+    try {
+      // Load dictionary files from public directory
+      // These files are served as static assets and are accessible via HTTP
+      const [affResponse, dicResponse] = await Promise.all([
+        fetch('/dictionaries/en_US.aff'),
+        fetch('/dictionaries/en_US.dic')
+      ]);
+      
+      console.log('🔧 Dictionary responses:', affResponse.ok, dicResponse.ok);
+      
+      if (!affResponse.ok || !dicResponse.ok) {
+        throw new Error('Failed to load dictionary files');
+      }
+      
+      const affContent = await affResponse.text();
+      const dicContent = await dicResponse.text();
+      
+      console.log('🔧 Dictionary content loaded:', affContent.length, dicContent.length);
+      
+      // Create spell checker with dictionary data
+      spell = nspell(affContent, dicContent);
+      
+      console.log('✅ Spell checker initialized');
+      
+      // Send ready message to main thread
+      self.postMessage({
+        type: 'ready',
+        message: 'Spell checker initialized successfully'
+      });
+      
+    } catch (error) {
+      console.error('❌ Failed to load dictionary:', error);
+      
+      // Send error message to main thread
+      self.postMessage({
+        type: 'error',
+        message: `Failed to initialize spell checker: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    } finally {
+      loadPromise = null;
+    }
+  })();
+  
+  return loadPromise;
 }
 
 /**
@@ -82,8 +103,11 @@ function processText(text: string): Array<{
   suggestions: string[];
 }> {
   if (!spell || !text) {
+    console.log('⚠️ No spell checker or text');
     return [];
   }
+  
+  console.log('🔍 Processing text:', text.substring(0, 50) + '...');
   
   const errors: Array<{
     word: string;
@@ -109,6 +133,7 @@ function processText(text: string): Array<{
     const result = checkWord(word);
     
     if (!result.correct) {
+      console.log('❌ Spelling error:', word, 'at', index, 'suggestions:', result.suggestions);
       errors.push({
         word,
         index,
@@ -118,6 +143,7 @@ function processText(text: string): Array<{
     }
   }
   
+  console.log('📝 Found', errors.length, 'spelling errors');
   return errors;
 }
 
@@ -125,15 +151,22 @@ function processText(text: string): Array<{
  * Handle messages from main thread
  */
 self.addEventListener('message', async (event) => {
+  console.log('📨 Worker received message:', event.data);
   const { type, data, requestId } = event.data;
   
   try {
     switch (type) {
       case 'init':
+        console.log('🔧 Initializing worker...');
         await loadDictionary();
         break;
         
       case 'checkWord': {
+        console.log('🔍 Checking word:', data.word);
+        
+        // Ensure dictionary is loaded
+        await loadDictionary();
+        
         const { word } = data;
         const result = checkWord(word);
         
@@ -146,15 +179,15 @@ self.addEventListener('message', async (event) => {
       }
       
       case 'checkText': {
+        console.log('🔍 Checking text:', data.text.substring(0, 50) + '...');
+        
+        // Ensure dictionary is loaded before processing
+        await loadDictionary();
+        
         const { text } = data;
-        
-        if (!spell) {
-          // If spell checker not ready, initialize it first
-          await loadDictionary();
-        }
-        
         const errors = processText(text);
         
+        console.log('📤 Sending text result:', errors);
         self.postMessage({
           type: 'textResult',
           requestId,
@@ -164,6 +197,9 @@ self.addEventListener('message', async (event) => {
       }
       
       case 'addWord': {
+        // Ensure dictionary is loaded
+        await loadDictionary();
+        
         const { word } = data;
         if (spell) {
           // TypeScript doesn't recognize the add method but it exists in nspell
@@ -179,9 +215,10 @@ self.addEventListener('message', async (event) => {
       }
       
       default:
-        console.warn('Unknown message type:', type);
+        console.warn('❓ Unknown message type:', type);
     }
   } catch (error) {
+    console.error('❌ Worker error:', error);
     self.postMessage({
       type: 'error',
       requestId,
@@ -191,4 +228,5 @@ self.addEventListener('message', async (event) => {
 });
 
 // Initialize dictionary on worker start
+console.log('🔧 Auto-initializing dictionary...');
 loadDictionary();

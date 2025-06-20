@@ -15,7 +15,8 @@
     "test:run": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "cd .. && husky install app/.husky"
+    "prepare": "cd .. && husky install app/.husky",
+    "postinstall": "cd .. && patch-package"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
@@ -30,6 +31,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",
+    "readability-score": "^1.0.1",
     "write-good": "^1.0.8",
     "zustand": "^5.0.5"
   },
@@ -39,6 +41,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/write-good": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
     "@vitejs/plugin-react": "^4.4.1",
@@ -51,6 +54,7 @@
     "globals": "^16.0.0",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "patch-package": "^8.0.0",
     "postcss": "^8.5.6",
     "prettier": "^3.5.3",
     "tailwindcss": "^4.1.10",

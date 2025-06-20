@@ -35,7 +35,7 @@ export function AppLayout() {
       </div>
 
       {/* Suggestions Feature - Right Sidebar */}
-      <div className="sidebar-width flex-shrink-0 hidden xl:block p-4 pl-0">
+      <div className="flex-shrink-0 hidden xl:block">
         <div className="h-full glass-panel rounded-l-2xl">
           <SuggestionsSidebar />
         </div>

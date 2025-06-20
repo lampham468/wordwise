@@ -20,7 +20,20 @@ declare module 'write-good' {
     reason: string
   }
   
-  function writeGood(text: string): WriteGoodSuggestion[]
+  interface WriteGoodOptions {
+    whitelist?: string[]
+    passive?: boolean
+    illusion?: boolean
+    so?: boolean
+    thereIs?: boolean
+    weasel?: boolean
+    adverb?: boolean
+    tooWordy?: boolean
+    cliches?: boolean
+    eprime?: boolean
+  }
+  
+  function writeGood(text: string, options?: WriteGoodOptions): WriteGoodSuggestion[]
   export = writeGood
 }
 

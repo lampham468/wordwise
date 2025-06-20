@@ -14,13 +14,13 @@ interface SuggestionsState {
   suggestions: Suggestion[];
   isAnalyzing: boolean;
   error: string | null;
-  activeTab: 'all' | 'grammar' | 'style' | 'content' | 'tone';
+  activeTab: 'grammar' | 'style' | 'content' | 'tone';
   
   // Actions
   setSuggestions: (suggestions: Suggestion[]) => void;
   setAnalyzing: (isAnalyzing: boolean) => void;
   setError: (error: string | null) => void;
-  setActiveTab: (tab: 'all' | 'grammar' | 'style' | 'content' | 'tone') => void;
+  setActiveTab: (tab: 'grammar' | 'style' | 'content' | 'tone') => void;
   
   // Suggestion actions
   dismissSuggestion: (suggestionId: string) => void;
@@ -39,7 +39,7 @@ export const useSuggestionsStore = create<SuggestionsState>()(
     suggestions: [],
     isAnalyzing: false,
     error: null,
-    activeTab: 'all',
+    activeTab: 'grammar',
 
     // Set suggestions
     setSuggestions: (suggestions) => {
@@ -76,7 +76,6 @@ export const useSuggestionsStore = create<SuggestionsState>()(
     // Get filtered suggestions based on active tab
     getFilteredSuggestions: () => {
       const { suggestions, activeTab } = get();
-      if (activeTab === 'all') return suggestions;
       return suggestions.filter(suggestion => suggestion.type === activeTab);
     }
   }))

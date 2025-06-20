@@ -11,7 +11,6 @@ export interface Suggestion {
   description: string;
   original?: string;
   suggested?: string;
-  confidence: number;
   position?: {
     start: number;
     end: number;

@@ -2,10 +2,11 @@
  * SuggestionsSidebar.tsx
  * 
  * Sidebar component for displaying AI-powered writing suggestions.
- * Shows suggestions organized by type with confidence scores and actions.
+ * Shows suggestions organized by type with actions.
  */
 
 import { useSuggestionsStore } from './stores/suggestions.store';
+import { useEditorStore } from '@/features/editor/stores/editor.store';
 
 /**
  * Suggestions sidebar component
@@ -23,8 +24,9 @@ export function SuggestionsSidebar() {
     getFilteredSuggestions
   } = useSuggestionsStore();
 
+  const { content, setContent } = useEditorStore();
+
   const tabs = [
-    { id: 'all' as const, label: 'All', count: suggestions.length },
     { id: 'grammar' as const, label: 'Grammar', count: suggestions.filter(s => s.type === 'grammar').length },
     { id: 'style' as const, label: 'Style', count: suggestions.filter(s => s.type === 'style').length },
     { id: 'content' as const, label: 'Content', count: suggestions.filter(s => s.type === 'content').length },
@@ -33,14 +35,13 @@ export function SuggestionsSidebar() {
 
   const filteredSuggestions = getFilteredSuggestions();
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'text-success-600 bg-success-50';
-    if (confidence >= 0.6) return 'text-warning-600 bg-warning-50';
-    return 'text-error-600 bg-error-50';
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
+  const getTypeIcon = (suggestion: any) => {
+    // Check if it's a spelling suggestion based on ID
+    if (suggestion.id?.startsWith('spelling-')) {
+      return '🔤';
+    }
+    
+    switch (suggestion.type) {
       case 'grammar': return '📝';
       case 'style': return '✨';
       case 'content': return '💡';
@@ -49,74 +50,107 @@ export function SuggestionsSidebar() {
     }
   };
 
-  const handleApplySuggestion = (suggestionId: string) => {
-    // TODO: Apply suggestion to editor
-    console.log('Applying suggestion:', suggestionId);
-    dismissSuggestion(suggestionId);
+  // Handle applying a suggestion
+  const handleApplySuggestion = (suggestion: any) => {
+    if (!suggestion.position || !suggestion.suggested) {
+      console.warn('Cannot apply suggestion: missing position or suggested text');
+      return;
+    }
+
+    const { start, end } = suggestion.position;
+    const newContent = 
+      content.slice(0, start) + 
+      suggestion.suggested + 
+      content.slice(end);
+    
+    setContent(newContent);
+    dismissSuggestion(suggestion.id);
   };
 
   return (
-    <div className="sidebar-width flex flex-col h-full">
+    <div className="h-full flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-neutral-900">AI Suggestions</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">
+            Writing Assistant
+          </h2>
           {suggestions.length > 0 && (
             <button
               onClick={clearAllSuggestions}
-              className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-white/20"
+              className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors duration-75"
             >
               Clear all
             </button>
           )}
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2">
+        {/* Tabs - 2x2 Grid */}
+        <div className="grid grid-cols-2 gap-2 bg-neutral-100 p-2 rounded-lg">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-2 text-xs font-medium rounded-xl transition-all duration-200 ${
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 text-center ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
-                  : 'bg-white/40 text-neutral-600 hover:bg-white/60 hover:shadow-soft'
+                  ? 'bg-white text-neutral-900 shadow-sm'
+                  : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >
-              {tab.label} {tab.count > 0 && `(${tab.count})`}
+              <div className="flex flex-col items-center space-y-1">
+                <span className="font-medium">{tab.label}</span>
+                {tab.count > 0 && (
+                  <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs ${
+                    activeTab === tab.id
+                      ? 'bg-primary-100 text-primary-700'
+                      : 'bg-neutral-200 text-neutral-600'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Content Area */}
+      {/* Error Display */}
+      {error && (
+        <div className="mx-4 mt-2 p-3 bg-error-50 border border-error-200 rounded">
+          <p className="text-sm text-error-700 leading-relaxed">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="text-xs text-error-600 hover:text-error-800 mt-1 transition-colors duration-75"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {isAnalyzing ? (
-          <div className="p-4 text-center">
-            <div className="animate-spin h-6 w-6 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-            <p className="text-sm text-neutral-500">Analyzing your text...</p>
+        {/* Loading State */}
+        {isAnalyzing && (
+          <div className="p-6 text-center">
+            <div className="text-neutral-500 animate-pulse-subtle">Analyzing your writing...</div>
           </div>
-        ) : error ? (
-          <div className="p-4">
-            <div className="bg-error-50 border border-error-200 rounded p-3">
-              <p className="text-sm text-error-700 leading-relaxed">{error}</p>
-            </div>
-          </div>
-        ) : filteredSuggestions.length === 0 ? (
-          <div className="p-4 text-center text-neutral-500">
-            <div className="mb-4">
-              <svg className="w-12 h-12 mx-auto text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <p className="text-sm">
-              {activeTab === 'all' 
-                ? 'No suggestions available. Start writing to get AI-powered recommendations!' 
-                : `No ${activeTab} suggestions found.`
+        )}
+
+        {/* Empty State */}
+        {!isAnalyzing && !error && filteredSuggestions.length === 0 && (
+          <div className="p-6 text-center">
+            <div className="text-neutral-400 mb-2">✨</div>
+            <p className="text-sm text-neutral-600">
+              {suggestions.length === 0 
+                ? "Start typing to get writing suggestions"
+                : `No ${activeTab} suggestions`
               }
             </p>
           </div>
-        ) : (
+        )}
+
+        {/* Suggestions List */}
+        {!isAnalyzing && !error && filteredSuggestions.length > 0 && (
           <div className="p-6 space-y-4">
             {filteredSuggestions.map((suggestion) => (
               <div
@@ -126,14 +160,11 @@ export function SuggestionsSidebar() {
                 {/* Suggestion Header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-lg">{getTypeIcon(suggestion.type)}</span>
+                    <span className="text-lg">{getTypeIcon(suggestion)}</span>
                     <div>
                       <p className="text-sm font-medium text-neutral-900 capitalize">
-                        {suggestion.type}
+                        {suggestion.id?.startsWith('spelling-') ? 'Spelling' : suggestion.type}
                       </p>
-                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getConfidenceColor(suggestion.confidence)}`}>
-                        {Math.round(suggestion.confidence * 100)}% confidence
-                      </div>
                     </div>
                   </div>
                   <button
@@ -148,40 +179,48 @@ export function SuggestionsSidebar() {
                 </div>
 
                 {/* Suggestion Content */}
-                <div className="mb-4">
-                  <p className="text-sm text-neutral-700 mb-3 leading-relaxed">{suggestion.description}</p>
-                  
-                  {suggestion.suggested && (
-                    <div className="bg-neutral-50 rounded p-3">
-                      <div className="text-xs text-neutral-500 mb-1">Suggested change:</div>
-                      <div className="space-y-1">
-                        <div className="text-sm">
-                          <span className="text-error-600 line-through">{suggestion.original}</span>
-                        </div>
-                        <div className="text-sm">
-                          <span className="text-success-600 font-medium">{suggestion.suggested}</span>
-                        </div>
-                      </div>
+                <div className="space-y-3">
+                  <p className="text-sm text-neutral-700 leading-relaxed">
+                    {suggestion.description}
+                  </p>
+
+                  {/* Original Text */}
+                  {suggestion.original && (
+                    <div className="bg-error-50 border border-error-200 rounded-lg p-3">
+                      <p className="text-xs font-medium text-error-800 mb-1">Current:</p>
+                      <p className="text-sm text-error-700 font-mono">
+                        "{suggestion.original}"
+                      </p>
                     </div>
                   )}
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex space-x-3">
+                  {/* Suggested Text */}
                   {suggestion.suggested && (
-                    <button
-                      onClick={() => handleApplySuggestion(suggestion.id)}
-                      className="sleek-button flex-1 px-4 py-2 text-white text-sm font-medium rounded-lg"
-                    >
-                      Apply
-                    </button>
+                    <div className="bg-success-50 border border-success-200 rounded-lg p-3">
+                      <p className="text-xs font-medium text-success-800 mb-1">Suggested:</p>
+                      <p className="text-sm text-success-700 font-mono">
+                        "{suggestion.suggested}"
+                      </p>
+                    </div>
                   )}
-                  <button
-                    onClick={() => dismissSuggestion(suggestion.id)}
-                    className="flex-1 px-4 py-2 bg-white/60 text-neutral-700 text-sm font-medium rounded-lg hover:bg-white/80 transition-all duration-200 hover:shadow-soft"
-                  >
-                    Dismiss
-                  </button>
+
+                  {/* Actions */}
+                  <div className="flex items-center space-x-2 pt-2">
+                    {suggestion.suggested && (
+                      <button
+                        onClick={() => handleApplySuggestion(suggestion)}
+                        className="sleek-button-secondary text-xs px-3 py-1.5 rounded-lg hover:shadow-soft transition-all duration-200"
+                      >
+                        Apply
+                      </button>
+                    )}
+                    <button
+                      onClick={() => dismissSuggestion(suggestion.id)}
+                      className="text-xs text-neutral-500 hover:text-neutral-700 px-3 py-1.5 transition-colors duration-75"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

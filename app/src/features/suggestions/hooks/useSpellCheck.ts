@@ -1,18 +1,19 @@
 /**
- * useGrammarAnalysis.ts - Hook for grammar analysis integration
+ * useSpellCheck.ts - Hook for spell checking integration
  * 
- * Integrates write-good grammar analysis with editor content changes.
+ * Integrates nspell spell checking with editor content changes.
  * Provides debounced analysis and manages suggestions state.
  */
 
 import { useEffect, useCallback, useState } from 'react';
 import { useSuggestionsStore } from '../stores/suggestions.store';
-import { analyzeGrammar } from '../services/grammar.service';
+import { analyzeSpelling } from '../services/spell.service';
+import type { Suggestion } from '@/types/suggestions';
 
 /**
- * Hook for grammar analysis integration
+ * Hook for spell checking integration
  */
-export function useGrammarAnalysis(content: string, enabled: boolean = true) {
+export function useSpellCheck(content: string, enabled: boolean = true) {
   const {
     setSuggestions,
     setAnalyzing,
@@ -34,7 +35,7 @@ export function useGrammarAnalysis(content: string, enabled: boolean = true) {
     return () => clearTimeout(timer);
   }, [content]);
 
-  // Analyze grammar with error handling
+  // Analyze spell check with error handling
   const analyzeContent = useCallback(async (text: string) => {
     if (!enabled || !text.trim()) {
       setSuggestions([]);
@@ -45,21 +46,22 @@ export function useGrammarAnalysis(content: string, enabled: boolean = true) {
       setAnalyzing(true);
       setError(null);
       
-      // Run grammar analysis
-      const grammarSuggestions = analyzeGrammar(text);
+      // Run spell checking analysis (now async)
+      const spellingSuggestions = await analyzeSpelling(text);
       
-      // Filter out existing non-grammar suggestions and add new grammar ones
-      const existingSuggestions = suggestions.filter(s => s.type !== 'grammar');
-      const allSuggestions = [...existingSuggestions, ...grammarSuggestions];
+      // Get current suggestions from store and update without circular dependency
+      const currentSuggestions = useSuggestionsStore.getState().suggestions;
+      const existingSuggestions = currentSuggestions.filter((s: Suggestion) => s.type !== 'grammar');
+      const allSuggestions = [...existingSuggestions, ...spellingSuggestions];
       
       setSuggestions(allSuggestions);
     } catch (err) {
-      console.error('Grammar analysis failed:', err);
-      setError(err instanceof Error ? err.message : 'Grammar analysis failed');
+      console.error('Spell check failed:', err);
+      setError(err instanceof Error ? err.message : 'Spell check failed');
     } finally {
       setAnalyzing(false);
     }
-  }, [enabled, setSuggestions, setAnalyzing, setError, suggestions]);
+  }, [enabled, setSuggestions, setAnalyzing, setError]);
 
   // Run analysis when debounced content changes
   useEffect(() => {
@@ -75,6 +77,6 @@ export function useGrammarAnalysis(content: string, enabled: boolean = true) {
     isAnalyzing,
     error,
     triggerAnalysis,
-    grammarSuggestions: suggestions.filter(s => s.type === 'grammar'),
+    spellingSuggestions: suggestions.filter(s => s.type === 'grammar'), // Keep type as 'grammar' for now
   };
 } 

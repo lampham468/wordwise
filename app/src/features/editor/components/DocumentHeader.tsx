@@ -10,6 +10,7 @@ import { DocumentTitle } from './DocumentTitle';
 import { DocumentMeta } from './DocumentMeta';
 import { useDocumentsStore } from '../../documents/stores/documents.store';
 import { useEditorStore } from '../stores/editor.store';
+import { analyzeText } from '@/utils/text-analysis';
 import type { SaveStatus, DocumentStats } from '@/types/supabase';
 
 interface DocumentHeaderProps {
@@ -18,17 +19,15 @@ interface DocumentHeaderProps {
 }
 
 /**
- * Calculate document statistics from content
+ * Calculate document statistics from content using proper text analysis
  */
 function calculateStats(content: string): DocumentStats {
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const charCount = content.length;
-  const readabilityScore = Math.floor(Math.random() * 100); // TODO: Implement real readability calculation
-
+  const analysis = analyzeText(content);
+  
   return {
-    wordCount,
-    charCount,
-    readabilityScore
+    wordCount: analysis.words,
+    charCount: analysis.characters,
+    readabilityScore: analysis.readabilityScore
   };
 }
 
