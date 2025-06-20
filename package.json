@@ -12,7 +12,8 @@
     "preview": "npm run preview --workspace=app",
     "lint": "npm run lint --workspace=app",
     "type-check": "npm run type-check --workspace=app",
-    "test": "npm run test --workspace=app"
+    "test": "npm run test --workspace=app",
+    "test:run": "npm run test:run --workspace=app"
   },
   "engines": {
     "node": ">=18.0.0",
