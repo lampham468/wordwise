@@ -67,8 +67,8 @@
 
 /* Layout constants for component sizing */
 :root {
-  --editor-max-width: 800px;
-  --sidebar-width: 280px;
+  --editor-max-width: 1000px; /* Increased from 800px to better utilize space */
+  --sidebar-width: 20rem; /* 320px - matches w-80 */
   --toolbar-height: 60px;
 }
 
@@ -172,12 +172,14 @@ a {
 
 /* App-specific utility classes */
 .prose {
-  max-width: var(--editor-max-width);
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  width: 100%;
 }
 
 .sidebar-width {
   width: var(--sidebar-width);
+  flex-shrink: 0;
 }
 
 .toolbar-height {
@@ -268,6 +270,10 @@ a {
   font-size: 16px;
   line-height: 1.6;
   color: theme('colors.neutral.900');
+  /* Prevent layout shifts */
+  min-height: 500px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

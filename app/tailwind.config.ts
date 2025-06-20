@@ -86,7 +86,7 @@ export default {
       },
       maxWidth: {
         'prose': '65ch',
-        'editor': '800px',
+        'editor': 'none',
       },
       borderRadius: {
         'xl': '12px',

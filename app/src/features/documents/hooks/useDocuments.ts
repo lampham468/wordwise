@@ -24,7 +24,7 @@ export function useDocuments() {
   } = useDocumentsStore()
 
   // Memoize the current document to prevent unnecessary recalculations
-  const currentDocument = useMemo(() => getCurrentDocument(), [documents, useDocumentsStore(state => state.currentDocumentId)])
+  const currentDocument = useMemo(() => getCurrentDocument(), [getCurrentDocument])
 
   // Memoize the returned object to prevent unnecessary re-renders
   return useMemo(() => ({

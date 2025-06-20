@@ -55,7 +55,7 @@ export function DocumentTitle() {
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         placeholder="Untitled"
-        className="text-lg font-semibold text-neutral-900 bg-neutral-100 border border-neutral-200 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent hover:bg-neutral-50 transition-colors min-w-0 flex-1 max-w-md"
+        className="text-lg font-semibold text-neutral-900 bg-neutral-100 border border-neutral-200 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent hover:bg-neutral-50 transition-colors min-w-0 flex-1"
       />
     </div>
   );

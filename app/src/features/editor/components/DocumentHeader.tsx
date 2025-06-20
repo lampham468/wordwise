@@ -75,7 +75,7 @@ export function DocumentHeader({
   }
 
   return (
-    <div className="group flex items-center justify-between p-6 bg-gradient-to-r from-white/80 to-primary-50/30 backdrop-blur-sm border-b border-white/20">
+    <div className="group flex items-center justify-between px-8 py-6 bg-gradient-to-r from-white/80 to-primary-50/30 backdrop-blur-sm border-b border-white/20">
       <div className="flex items-center space-x-4 min-w-0 flex-1">
         <DocumentTitle />
       </div>

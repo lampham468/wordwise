@@ -89,7 +89,7 @@ export function useWritingAnalysis(
     } finally {
       setAnalyzing(false);
     }
-  }, [enabled, config, setSuggestions, setAnalyzing, setError]);
+  }, [enabled, config]);
 
   // Run analysis when debounced content changes
   useEffect(() => {

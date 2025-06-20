@@ -6,7 +6,7 @@
 import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
-import type { SpellError } from '@/features/editor/hooks/useSpellCheck'
+import type { SuggestionError } from '../components/SuggestionsPopover'
 
 /**
  * Plugin key for spell check decorations
@@ -17,7 +17,7 @@ export const spellCheckPluginKey = new PluginKey('spellCheck')
  * Create decorations for spell check errors
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createDecorations(doc: any, errors: SpellError[]): DecorationSet {
+function createDecorations(doc: any, errors: SuggestionError[]): DecorationSet {
   const decorations: Decoration[] = []
   
   for (const error of errors) {
@@ -49,7 +49,7 @@ function createDecorations(doc: any, errors: SpellError[]): DecorationSet {
 /**
  * Create spell check extension with errors
  */
-export function createSpellCheckExtension(errors: SpellError[], onErrorClick?: (error: SpellError) => void) {
+export function createSpellCheckExtension(errors: SuggestionError[], onErrorClick?: (error: SuggestionError) => void) {
   return Extension.create({
     name: 'spellCheck',
     
@@ -88,7 +88,7 @@ export function createSpellCheckExtension(errors: SpellError[], onErrorClick?: (
                 // Check if clicked element has spell check data
                 if (target.dataset.errorType) {
                   const errorType = target.dataset.errorType as 'spelling' | 'grammar' | 'style'
-                  const error: SpellError = {
+                  const error: SuggestionError = {
                     start: 0, // Will be filled by the handler
                     end: 0,   // Will be filled by the handler
                     word: target.dataset.errorWord || '',

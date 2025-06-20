@@ -74,9 +74,14 @@ export function DocumentSidebar() {
 
     // If no documents exist, create one
     if (documents.length === 0 && !isLoading) {
-      handleNewDocument();
+      // Call createNewDocument directly to avoid circular dependency
+      createNewDocument().then(newDoc => {
+        if (newDoc) {
+          setCurrentDocument(newDoc.number);
+        }
+      });
     }
-  }, [documents.length, currentDocumentId, isInitialized, isLoading]);
+  }, [documents.length, currentDocumentId, isInitialized, isLoading, createNewDocument, setCurrentDocument]);
 
   // Memoize handlers to prevent unnecessary re-renders
   const handleSearch = useCallback((query: string) => {
