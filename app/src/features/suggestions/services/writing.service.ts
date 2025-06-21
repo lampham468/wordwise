@@ -82,7 +82,7 @@ export async function analyzeWriting(text: string, config: WritingConfig = DEFAU
     // Run spell checking (asynchronous)
     if (config.spelling?.enabled !== false) {
       console.log('🔍 Running spell checking...');
-      const spellingSuggestions = await analyzeSpelling(text, config.spelling);
+      const spellingSuggestions = await analyzeSpelling(text);
       suggestions.push(...spellingSuggestions);
     }
 
@@ -111,8 +111,8 @@ export function analyzeGrammarOnly(text: string, config?: WritingConfig['grammar
 /**
  * Analyzes only spelling issues (asynchronous)
  */
-export async function analyzeSpellingOnly(text: string, config?: WritingConfig['spelling']): Promise<Suggestion[]> {
-  return analyzeSpelling(text, config);
+export async function analyzeSpellingOnly(text: string): Promise<Suggestion[]> {
+  return analyzeSpelling(text);
 }
 
 /**

@@ -5,7 +5,7 @@
  * Provides play, pause, stop, and voice selection controls.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTTS } from '../hooks/useTTS';
 import type { TTSOptions } from '../types/file-import.types';
 
@@ -47,8 +47,8 @@ export function TTSControls({
     clearError
   } = useTTS({
     ...ttsOptions,
-    onSuccess,
-    onError,
+    ...(onSuccess && { onSuccess }),
+    ...(onError && { onError }),
     autoPlay: true
   });
 
@@ -71,7 +71,7 @@ export function TTSControls({
   /**
    * Handle voice selection
    */
-  const handleVoiceChange = (voice: TTSOptions['voice']) => {
+  const handleVoiceChange = (voice: NonNullable<TTSOptions['voice']>) => {
     setTtsOptions(prev => ({ ...prev, voice }));
     setShowVoiceOptions(false);
   };
@@ -174,10 +174,10 @@ export function TTSControls({
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Voice</label>
                 <div className="grid grid-cols-2 gap-1">
-                  {['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'].map((voice) => (
+                  {(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'] as const).map((voice) => (
                     <button
                       key={voice}
-                      onClick={() => handleVoiceChange(voice as TTSOptions['voice'])}
+                      onClick={() => handleVoiceChange(voice)}
                       className={`px-2 py-1 text-xs rounded capitalize transition-colors ${
                         ttsOptions.voice === voice
                           ? 'bg-green-100 text-green-800'

@@ -5,7 +5,6 @@
  * Shows active uploads, progress bars, and completion status.
  */
 
-import React from 'react';
 import { useFileImportStore } from '../stores/file-import.store';
 import type { FileUploadProgress, ProcessingStatus } from '../types/file-import.types';
 
