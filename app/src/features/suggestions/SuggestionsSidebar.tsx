@@ -35,7 +35,7 @@ export function SuggestionsSidebar() {
 
   const filteredSuggestions = getFilteredSuggestions();
 
-  const getTypeIcon = (suggestion: any) => {
+  const getTypeIcon = (suggestion: { id?: string; type?: string }) => {
     // Check if it's a spelling suggestion based on ID
     if (suggestion.id?.startsWith('spelling-')) {
       return '🔤';
@@ -51,7 +51,11 @@ export function SuggestionsSidebar() {
   };
 
   // Handle applying a suggestion
-  const handleApplySuggestion = (suggestion: any) => {
+  const handleApplySuggestion = (suggestion: { 
+    id: string; 
+    position?: { start: number; end: number }; 
+    suggested?: string 
+  }) => {
     if (!suggestion.position || !suggestion.suggested) {
       console.warn('Cannot apply suggestion: missing position or suggested text');
       return;

@@ -21,15 +21,31 @@ interface UseTipTapEditorProps {
 /**
  * Convert suggestions to spell check errors for the editor
  */
-function convertSuggestionsToErrors(suggestions: any[]): SuggestionError[] {
-  return suggestions.map(suggestion => ({
-    word: suggestion.original || suggestion.word || '',
-    start: suggestion.position?.start || 0,
-    end: suggestion.position?.end || 0,
-    suggestions: suggestion.suggested ? [suggestion.suggested] : [],
-    type: suggestion.type === 'grammar' ? 'grammar' : 'spelling',
-    message: suggestion.description || suggestion.message
-  }));
+function convertSuggestionsToErrors(suggestions: Array<{ 
+  original?: string; 
+  word?: string; 
+  position?: { start: number; end: number }; 
+  suggested?: string; 
+  type?: string; 
+  description?: string; 
+  message?: string;
+}>): SuggestionError[] {
+  return suggestions.map(suggestion => {
+    const error: SuggestionError = {
+      word: suggestion.original || suggestion.word || '',
+      start: suggestion.position?.start || 0,
+      end: suggestion.position?.end || 0,
+      suggestions: suggestion.suggested ? [suggestion.suggested] : [],
+      type: (suggestion.type === 'grammar' ? 'grammar' : 'spelling') as 'spelling' | 'grammar' | 'style'
+    };
+    
+    const message = suggestion.description || suggestion.message;
+    if (message) {
+      error.message = message;
+    }
+    
+    return error;
+  });
 }
 
 /**

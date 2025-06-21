@@ -7,9 +7,7 @@
 
 import type { 
   TranscriptionResult, 
-  FileMetadata,
-  SUPPORTED_AUDIO_TYPES,
-  SUPPORTED_VIDEO_TYPES 
+  FileMetadata
 } from '../types/file-import.types';
 
 // Supabase configuration - will be imported from lib/supabase

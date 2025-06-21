@@ -58,7 +58,10 @@ export function analyzeGrammar(text: string, config: GrammarConfig = DEFAULT_CON
     console.log('📝 Analyzing grammar for text:', text.substring(0, 50) + '...');
     
     // Configure write-good options
-    const writeGoodOptions: any = {
+    const writeGoodOptions: { 
+      whitelist: string[];
+      [key: string]: boolean | string[] | undefined;
+    } = {
       whitelist: config.whitelist || [],
     };
 

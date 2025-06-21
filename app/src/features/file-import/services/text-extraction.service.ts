@@ -7,9 +7,7 @@
 
 import type { 
   TextExtractionResult, 
-  FileMetadata,
-  SUPPORTED_TEXT_TYPES,
-  SUPPORTED_PDF_TYPES 
+  FileMetadata
 } from '../types/file-import.types';
 
 // PDF.js imports
@@ -187,9 +185,9 @@ async function extractFromPDFFile(file: File): Promise<{ content: string; pageCo
         
         // Extract text items and join them
         const pageText = textContent.items
-          .map((item: any) => {
+          .map((item: { str?: string; [key: string]: unknown }) => {
             // Handle different text item types
-            if ('str' in item) {
+            if ('str' in item && typeof item.str === 'string') {
               return item.str;
             }
             return '';

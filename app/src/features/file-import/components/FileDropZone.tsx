@@ -7,7 +7,6 @@
 
 import React, { useCallback, useState, useRef } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
-import { getSupportedFileTypes } from '../services/text-extraction.service';
 import type { TextExtractionResult } from '../types/file-import.types';
 
 interface FileDropZoneProps {
@@ -31,7 +30,6 @@ export function FileDropZone({
   disabled = false
 }: FileDropZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [dragCounter, setDragCounter] = useState(0);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const { uploadFiles, isProcessing } = useFileUpload({
@@ -50,8 +48,6 @@ export function FileDropZone({
     
     if (disabled) return;
 
-    setDragCounter(prev => prev + 1);
-    
     if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
       setIsDragOver(true);
     }
@@ -66,13 +62,10 @@ export function FileDropZone({
     
     if (disabled) return;
 
-    setDragCounter(prev => {
-      const newCounter = prev - 1;
-      if (newCounter === 0) {
-        setIsDragOver(false);
-      }
-      return newCounter;
-    });
+    // Only set to false if leaving the main drop zone
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
   }, [disabled]);
 
   /**
@@ -99,7 +92,6 @@ export function FileDropZone({
 
     // Reset drag state
     setIsDragOver(false);
-    setDragCounter(0);
 
     // Get dropped files
     const files = Array.from(e.dataTransfer.files);

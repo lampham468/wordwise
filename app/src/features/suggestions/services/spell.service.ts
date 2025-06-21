@@ -10,20 +10,20 @@ import type { Suggestion } from '@/types/suggestions';
 /**
  * Configuration for spell checking
  */
-interface SpellConfig {
-  enabled?: boolean;
-  maxSuggestions?: number;
-  minWordLength?: number;
-}
+// interface SpellConfig {
+//   enabled?: boolean;
+//   maxSuggestions?: number;
+//   minWordLength?: number;
+// }
 
 /**
  * Default configuration for spell checking
  */
-const DEFAULT_CONFIG: SpellConfig = {
-  enabled: true,
-  maxSuggestions: 5,
-  minWordLength: 3,
-};
+// const DEFAULT_CONFIG: SpellConfig = {
+//   enabled: true,
+//   maxSuggestions: 5,
+//   minWordLength: 3,
+// };
 
 /**
  * Result from spell worker
@@ -102,7 +102,7 @@ async function checkTextWithWorker(text: string): Promise<SpellWorkerResult[]> {
 /**
  * Analyzes text for spelling issues using nspell via Web Worker
  */
-export async function analyzeSpelling(text: string, _config: SpellConfig = DEFAULT_CONFIG): Promise<Suggestion[]> {
+export async function analyzeSpelling(text: string): Promise<Suggestion[]> {
   if (!text.trim()) {
     console.log('⚠️ Empty text, skipping spell check');
     return [];

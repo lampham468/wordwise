@@ -203,7 +203,7 @@ self.addEventListener('message', async (event) => {
         const { word } = data;
         if (spell) {
           // TypeScript doesn't recognize the add method but it exists in nspell
-          (spell as any).add(word);
+          (spell as unknown as { add: (word: string) => void }).add(word);
         }
         
         self.postMessage({

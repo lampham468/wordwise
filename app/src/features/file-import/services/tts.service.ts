@@ -192,6 +192,7 @@ export async function synthesizeLongText(
     
     const chunk = chunks[i];
     if (chunk) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { onProgress, ...chunkOptions } = options;
       const result = await synthesizeSpeech(chunk, chunkOptions);
       

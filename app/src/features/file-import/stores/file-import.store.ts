@@ -11,7 +11,8 @@ import type {
   FileImportState, 
   ProcessedFile, 
   FileUploadProgress,
-  ProcessingStatus 
+  ProcessingStatus,
+  TextExtractionResult
 } from '../types/file-import.types';
 
 interface FileImportStore extends FileImportState {
@@ -30,7 +31,7 @@ interface FileImportStore extends FileImportState {
   startFileUpload: (file: File) => void;
   updateFileProgress: (fileId: string, progress: number) => void;
   setFileStatus: (fileId: string, status: ProcessingStatus, error?: string) => void;
-  completeFileUpload: (fileId: string, result: any) => void;
+  completeFileUpload: (fileId: string, result: TextExtractionResult) => void;
   removeFileUpload: (fileId: string) => void;
   clearAllUploads: () => void;
   
