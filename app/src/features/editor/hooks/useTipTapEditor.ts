@@ -9,6 +9,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { createSpellCheckExtension } from '../extensions/SpellCheckExtension';
 import { useSuggestionsStore } from '../../suggestions/stores/suggestions.store';
+import { htmlToPlainText, mapTextPositionToHtml } from '@/utils/text-conversion';
 import type { SuggestionError } from '../components/SuggestionsPopover';
 
 interface UseTipTapEditorProps {
@@ -20,21 +21,53 @@ interface UseTipTapEditorProps {
 
 /**
  * Convert suggestions to spell check errors for the editor
+ * Maps plain text positions to HTML positions for proper decorations
  */
-function convertSuggestionsToErrors(suggestions: Array<{ 
-  original?: string; 
-  word?: string; 
-  position?: { start: number; end: number }; 
-  suggested?: string; 
-  type?: string; 
-  description?: string; 
-  message?: string;
-}>): SuggestionError[] {
+function convertSuggestionsToErrors(
+  suggestions: Array<{ 
+    original?: string; 
+    word?: string; 
+    position?: { start: number; end: number }; 
+    suggested?: string; 
+    type?: string; 
+    description?: string; 
+    message?: string;
+  }>,
+  htmlContent: string
+): SuggestionError[] {
+  if (!suggestions.length || !htmlContent) {
+    return [];
+  }
+
+  // Get position mapping from HTML content
+  const { positionMap } = htmlToPlainText(htmlContent);
+  
   return suggestions.map(suggestion => {
+    if (!suggestion.position) {
+      const error: SuggestionError = {
+        word: suggestion.original || suggestion.word || '',
+        start: 0,
+        end: 0,
+        suggestions: suggestion.suggested ? [suggestion.suggested] : [],
+        type: (suggestion.type === 'grammar' ? 'grammar' : 'spelling') as 'spelling' | 'grammar' | 'style'
+      };
+      
+      const message = suggestion.description || suggestion.message;
+      if (message) {
+        error.message = message;
+      }
+      
+      return error;
+    }
+
+    // Map plain text positions to HTML positions
+    const htmlStart = mapTextPositionToHtml(suggestion.position.start, positionMap);
+    const htmlEnd = mapTextPositionToHtml(suggestion.position.end, positionMap);
+    
     const error: SuggestionError = {
       word: suggestion.original || suggestion.word || '',
-      start: suggestion.position?.start || 0,
-      end: suggestion.position?.end || 0,
+      start: htmlStart,
+      end: htmlEnd,
       suggestions: suggestion.suggested ? [suggestion.suggested] : [],
       type: (suggestion.type === 'grammar' ? 'grammar' : 'spelling') as 'spelling' | 'grammar' | 'style'
     };
@@ -62,7 +95,13 @@ export function useTipTapEditor({
   const [popoverPosition, setPopoverPosition] = useState<{ x: number; y: number } | null>(null);
   
   const { suggestions } = useSuggestionsStore();
-  const errors = useMemo(() => convertSuggestionsToErrors(suggestions), [suggestions]);
+  const errors = useMemo(() => {
+    console.log('🎯 TipTap Editor - Received suggestions:', suggestions);
+    console.log('🎯 TipTap Editor - Current content length:', content.length);
+    const converted = convertSuggestionsToErrors(suggestions, content);
+    console.log('🎯 TipTap Editor - Converted to errors:', converted);
+    return converted;
+  }, [suggestions, content]);
 
   // Handle error click for showing suggestions
   const handleErrorClick = useCallback((error: SuggestionError) => {

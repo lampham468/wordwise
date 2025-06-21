@@ -60,23 +60,20 @@ export function DocumentHeader({
   // Show placeholder state if no document is selected
   if (!currentDocumentId) {
     return (
-      <div className="flex items-center justify-between p-4 bg-white border-b border-neutral-200">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-lg font-semibold text-neutral-400">No document selected</h1>
-          <div className="text-sm text-neutral-400">Ready</div>
+      <div className="flex items-center justify-between p-2 bg-white border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <h1 className="text-sm font-medium text-gray-400">No document selected</h1>
         </div>
-        <div className="flex items-center space-x-4 text-sm text-neutral-400">
+        <div className="flex items-center space-x-2 text-xs text-gray-400">
           <span>0 words</span>
-          <span>0 characters</span>
-          <span>Readability: --</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="group flex items-center justify-between px-8 py-6 bg-gradient-to-r from-white/80 to-primary-50/30 backdrop-blur-sm border-b border-white/20">
-      <div className="flex items-center space-x-4 min-w-0 flex-1">
+    <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+      <div className="flex items-center space-x-2 min-w-0 flex-1">
         <DocumentTitle />
       </div>
       

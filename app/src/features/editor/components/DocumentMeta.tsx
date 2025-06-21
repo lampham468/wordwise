@@ -103,44 +103,25 @@ export function DocumentMeta({ saveStatus, stats }: DocumentMetaProps) {
   };
 
   return (
-    <div className="flex items-center space-x-6 text-sm">
+    <div className="flex items-center space-x-3 text-xs">
       {/* Save Status */}
       <div className="flex items-center">
         {getSaveStatusDisplay()}
       </div>
 
-      {/* Divider */}
-      <div className="w-px h-4 bg-neutral-300"></div>
-
       {/* Document Statistics */}
-      <div className="flex items-center space-x-4 text-neutral-600">
-        <span>{stats.wordCount} {stats.wordCount === 1 ? 'word' : 'words'}</span>
-        <span>{stats.charCount} {stats.charCount === 1 ? 'character' : 'characters'}</span>
-        
-        {/* Enhanced Readability Score */}
-        <div className="flex items-center space-x-1">
-          <span className="text-neutral-500">Grade Level:</span>
-          <span 
-            className={`font-medium ${readabilityColorClass}`}
-            title={`Flesch-Kincaid Grade Level: ${stats.readabilityScore || 0} (${readabilityAnalysis.description})`}
-          >
-            {stats.readabilityScore ? stats.readabilityScore.toFixed(1) : '0.0'} ({readabilityAnalysis.level})
-          </span>
-        </div>
+      <div className="flex items-center space-x-2 text-gray-600">
+        <span>{stats.wordCount} words</span>
+        <span>•</span>
+        <span>{stats.charCount} chars</span>
+        <span>•</span>
+        <span 
+          className={`${readabilityColorClass}`}
+          title={`Flesch-Kincaid Grade Level: ${stats.readabilityScore || 0} (${readabilityAnalysis.description})`}
+        >
+          Grade {stats.readabilityScore ? stats.readabilityScore.toFixed(1) : '0.0'}
+        </span>
       </div>
-
-      {/* Error Tooltip */}
-      {saveError && (
-        <div className="hidden group-hover:block absolute top-full right-0 mt-1 p-2 bg-error-50 border border-error-200 rounded shadow-lg z-10 max-w-xs">
-          <p className="text-sm text-error-700 leading-relaxed">{saveError}</p>
-          <button
-            onClick={clearSaveError}
-            className="mt-1 text-xs text-error-600 hover:text-error-800 underline transition-colors duration-75"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
     </div>
   );
 } 

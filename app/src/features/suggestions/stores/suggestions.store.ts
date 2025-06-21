@@ -76,7 +76,7 @@ export const useSuggestionsStore = create<SuggestionsState>()(
     // Get filtered suggestions based on active tab
     getFilteredSuggestions: () => {
       const { suggestions, activeTab } = get();
-      return suggestions.filter(suggestion => suggestion.type === activeTab);
+      return (suggestions || []).filter(suggestion => suggestion.type === activeTab);
     }
   }))
 ); 

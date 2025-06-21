@@ -27,6 +27,7 @@
     "@types/react-router-dom": "^5.3.3",
     "dictionary-en": "^4.0.0",
     "dictionary-en-us": "^2.2.1",
+    "lucide-react": "^0.519.0",
     "nspell": "^2.1.5",
     "pdfjs-dist": "^4.10.38",
     "react": "^19.1.0",

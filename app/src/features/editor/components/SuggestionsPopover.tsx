@@ -147,9 +147,9 @@ export function SuggestionsPopover({
       ref={popoverRef}
       className={`fixed z-50 bg-white rounded-lg shadow-lg border-2 ${styles.border} min-w-64 max-w-80`}
       style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: 'translate(-50%, -120%)'
+        left: `${Math.min(Math.max(position.x, 130), window.innerWidth - 200)}px`,
+        top: `${Math.max(position.y - 10, 10)}px`,
+        transform: 'translate(-50%, -100%)'
       }}
     >
       {/* Header */}

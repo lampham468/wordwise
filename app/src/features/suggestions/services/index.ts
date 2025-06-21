@@ -12,3 +12,5 @@ export { analyzeGrammar, applyGrammarSuggestion } from './grammar.service';
 export { analyzeSpelling, applySpellingSuggestion } from './spell.service';
 
 // Re-export types would go here if needed 
+
+export * from './ai-suggestions.service'

@@ -59,19 +59,17 @@ export function EditorContent() {
   }
 
   return (
-    <div className="flex-1 py-2 relative overflow-hidden">
-      <div className="w-full h-full flex justify-center">
-        <div className="w-full max-w-4xl px-8 h-full min-h-[500px] focus-within:outline-none">
-          <TipTapEditorContent 
-            key={currentDocumentId} // Force re-render when document changes
-            editor={editor}
-            className="prose prose-neutral max-w-none focus:outline-none h-full w-full"
-          />
-        </div>
+    <div className="h-full p-4 relative overflow-y-auto">
+      <div className="max-w-4xl mx-auto">
+        <TipTapEditorContent 
+          key={currentDocumentId} // Force re-render when document changes
+          editor={editor}
+          className="prose prose-sm max-w-none focus:outline-none"
+        />
       </div>
       
-      {/* File Import Button - fixed positioned to prevent shifting */}
-      <div className="absolute bottom-4 right-4">
+      {/* File Import Button - positioned to avoid overlaps */}
+      <div className="absolute bottom-4 right-4 z-50">
         <FileImportButton />
       </div>
 

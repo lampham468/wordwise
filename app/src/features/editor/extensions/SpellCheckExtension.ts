@@ -18,10 +18,12 @@ export const spellCheckPluginKey = new PluginKey('spellCheck')
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createDecorations(doc: any, errors: SuggestionError[]): DecorationSet {
+  console.log('🎨 Creating decorations for', errors.length, 'errors:', errors);
   const decorations: Decoration[] = []
   
   for (const error of errors) {
     const { start, end, type = 'spelling' } = error
+    console.log('🎨 Processing error:', { start, end, type, word: error.word });
     
     // Determine CSS class based on error type
     let className = 'spell-error' // Default
@@ -43,7 +45,8 @@ function createDecorations(doc: any, errors: SuggestionError[]): DecorationSet {
     decorations.push(decoration)
   }
   
-  return DecorationSet.create(doc, decorations)
+  console.log('🎨 Created', decorations.length, 'decorations');
+  return DecorationSet.create(doc, decorations);
 }
 
 /**

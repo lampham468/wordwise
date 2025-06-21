@@ -75,13 +75,13 @@ export function useWritingAnalysis(
       setAnalyzing(true);
       setError(null);
       
-      console.log('🔍 Starting comprehensive writing analysis...');
+      console.log('🔍 Starting comprehensive writing analysis for text:', text.substring(0, 100));
       
       // Run comprehensive writing analysis (grammar + spelling)
-      const writingSuggestions = await analyzeWriting(text, config);
+      const analysisResult = await analyzeWriting(text, config);
       
-      console.log(`📝 Analysis complete: ${writingSuggestions.length} suggestions found`);
-      setSuggestions(writingSuggestions);
+      console.log(`📝 Analysis complete: ${analysisResult.suggestions.length} suggestions found`, analysisResult.suggestions);
+      setSuggestions(analysisResult.suggestions);
       
     } catch (err) {
       console.error('Writing analysis failed:', err);
@@ -102,18 +102,18 @@ export function useWritingAnalysis(
   }, [content, analyzeContent]);
 
   // Separate suggestions by source for easier access
-  const grammarSuggestions = suggestions.filter(s => s.id.startsWith('grammar-'));
-  const spellingSuggestions = suggestions.filter(s => s.id.startsWith('spelling-'));
+  const grammarSuggestions = (suggestions || []).filter(s => s.id.startsWith('grammar-'));
+  const spellingSuggestions = (suggestions || []).filter(s => s.id.startsWith('spelling-'));
 
   return {
     isAnalyzing,
     error,
     triggerAnalysis,
-    suggestions,
+    suggestions: suggestions || [],
     grammarSuggestions,
     spellingSuggestions,
     stats: {
-      total: suggestions.length,
+      total: (suggestions || []).length,
       grammar: grammarSuggestions.length,
       spelling: spellingSuggestions.length,
     },

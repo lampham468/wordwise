@@ -50,7 +50,7 @@ export function useSpellCheck(content: string, enabled: boolean = true) {
       const spellingSuggestions = await analyzeSpelling(text);
       
       // Get current suggestions from store and update without circular dependency
-      const currentSuggestions = useSuggestionsStore.getState().suggestions;
+      const currentSuggestions = useSuggestionsStore.getState().suggestions || [];
       const existingSuggestions = currentSuggestions.filter((s: Suggestion) => s.type !== 'grammar');
       const allSuggestions = [...existingSuggestions, ...spellingSuggestions];
       
@@ -77,6 +77,6 @@ export function useSpellCheck(content: string, enabled: boolean = true) {
     isAnalyzing,
     error,
     triggerAnalysis,
-    spellingSuggestions: suggestions.filter(s => s.type === 'grammar'), // Keep type as 'grammar' for now
+    spellingSuggestions: (suggestions || []).filter(s => s.type === 'grammar'), // Keep type as 'grammar' for now
   };
 } 

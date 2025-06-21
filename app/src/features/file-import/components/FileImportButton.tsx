@@ -8,7 +8,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { useAudioTranscription } from '../hooks/useAudioTranscription';
-import { useTTS } from '../hooks/useTTS';
 import { useEditorStore } from '../../editor/stores/editor.store';
 
 interface FileImportButtonProps {
@@ -27,7 +26,7 @@ export function FileImportButton({ className = '', onSuccess }: FileImportButton
   const audioInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   
-  const { content, setContent } = useEditorStore();
+  const { setContent } = useEditorStore();
   
   // File upload hook
   const { uploadFile, isProcessing: isUploadProcessing, error: uploadError } = useFileUpload({
@@ -54,13 +53,7 @@ export function FileImportButton({ className = '', onSuccess }: FileImportButton
     }
   });
 
-  // TTS hook
-  const { synthesize, isSynthesizing, error: ttsError } = useTTS({
-    autoPlay: true,
-    onError: (error) => console.error('TTS Error:', error)
-  });
-
-  const isProcessing = isUploadProcessing || isTranscribing || isSynthesizing;
+  const isProcessing = isUploadProcessing || isTranscribing;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -96,20 +89,7 @@ export function FileImportButton({ className = '', onSuccess }: FileImportButton
     }
   };
 
-  // Handle TTS synthesis
-  const handleTTS = async () => {
-    if (!content || content.trim().length === 0) {
-      alert('Please add some text to your document first.');
-      return;
-    }
 
-    try {
-      await synthesize(content);
-      setIsDropdownOpen(false);
-    } catch (error) {
-      console.error('TTS failed:', error);
-    }
-  };
 
   // Handle voice recording
   const handleVoiceRecord = async () => {
@@ -197,23 +177,7 @@ export function FileImportButton({ className = '', onSuccess }: FileImportButton
       },
       description: 'Extract audio from .mp4, .mov, .avi videos'
     },
-    {
-      id: 'tts',
-      label: isSynthesizing ? 'Converting...' : 'Read Aloud',
-      icon: isSynthesizing ? (
-        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-        </svg>
-      ) : (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M8.586 17.414L12 14l-3.414-3.414-1.172 1.172 4.243 4.243z" />
-        </svg>
-      ),
-      onClick: handleTTS,
-      description: 'Convert your document text to speech',
-      disabled: !content || content.trim().length === 0
-    },
+
     {
       id: 'voice',
       label: isListening ? 'Stop Recording' : 'Voice Recording',
@@ -227,7 +191,8 @@ export function FileImportButton({ className = '', onSuccess }: FileImportButton
         </svg>
       ),
       onClick: handleVoiceRecord,
-      description: isListening ? 'Click to stop recording' : 'Record your voice and transcribe to text'
+      description: isListening ? 'Click to stop recording' : 'Record your voice and transcribe to text',
+      disabled: false
     }
   ];
 
@@ -317,7 +282,6 @@ export function FileImportButton({ className = '', onSuccess }: FileImportButton
             <p className="text-sm text-primary-800">
               {isUploadProcessing ? "Processing file..." :
                isTranscribing ? "Transcribing audio..." :
-               isSynthesizing ? "Converting to speech..." :
                "Processing..."}
             </p>
           </div>
@@ -325,10 +289,10 @@ export function FileImportButton({ className = '', onSuccess }: FileImportButton
       )}
 
       {/* Error Display */}
-      {(uploadError || transcriptionError || ttsError) && (
+      {(uploadError || transcriptionError) && (
         <div className="absolute -top-20 right-0 bg-red-50 border border-red-200 rounded-lg p-3 shadow-lg max-w-xs">
           <p className="text-sm text-red-800">
-            {uploadError || transcriptionError || ttsError}
+            {uploadError || transcriptionError}
           </p>
         </div>
       )}

@@ -1,236 +1,271 @@
 /**
- * SuggestionsSidebar.tsx
+ * SuggestionsSidebar.tsx - Main sidebar for all writing suggestions
  * 
- * Sidebar component for displaying AI-powered writing suggestions.
- * Shows suggestions organized by type with actions.
+ * Displays both traditional suggestions (grammar/spelling) and AI-powered suggestions
  */
 
-import { useSuggestionsStore } from './stores/suggestions.store';
-import { useEditorStore } from '@/features/editor/stores/editor.store';
+import { useState, useMemo } from 'react'
+import { useWritingAnalysis } from './hooks/useWritingAnalysis'
+import { useEditorStore } from '../editor/stores/editor.store'
+import { useSuggestionsStore } from './stores/suggestions.store'
+import { applySuggestion } from './services/writing.service'
+import { htmlToPlainText } from '@/utils/text-conversion'
+import { Badge } from '@/shared/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Button } from '@/shared/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { CheckCircle, RefreshCw, BookOpen, Sparkles } from 'lucide-react'
+import type { Suggestion } from '@/types/suggestions'
+
+interface SuggestionsSidebarProps {
+  text: string
+  documentId?: string
+  documentNumber?: number
+  userId?: string
+  className?: string
+}
 
 /**
- * Suggestions sidebar component
- * Uses the suggestions store directly - no props needed
+ * Traditional suggestion item component (grammar/spelling)
  */
-export function SuggestionsSidebar() {
+function TraditionalSuggestionItem({ 
+  suggestion,
+  onApply 
+}: {
+  suggestion: Suggestion
+  onApply: (suggestion: Suggestion) => void
+}) {
+  return (
+    <Card className="mb-3 border-l-4 border-l-blue-500">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <Badge 
+                variant="outline" 
+                className={
+                  suggestion.type === 'grammar' 
+                    ? 'bg-red-50 text-red-700 border-red-200'
+                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                }
+              >
+                {suggestion.type}
+              </Badge>
+              <span className="text-xs text-gray-500 capitalize">
+                {suggestion.category?.replace('-', ' ') || 'general'}
+              </span>
+            </div>
+            
+            <p className="text-sm text-gray-800 mb-2">
+              {suggestion.message}
+            </p>
+            
+            {suggestion.original && suggestion.suggested && (
+              <div className="text-xs space-y-1">
+                <div className="bg-red-50 border border-red-200 rounded p-2">
+                  <span className="text-red-600 font-medium">Original: </span>
+                  <span className="text-red-800">{suggestion.original}</span>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded p-2">
+                  <span className="text-green-600 font-medium">Suggested: </span>
+                  <span className="text-green-800">{suggestion.suggested}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onApply(suggestion)}
+            className="h-8 px-2 text-green-600 hover:bg-green-50"
+          >
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Apply
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * Main suggestions sidebar component
+ */
+export function SuggestionsSidebar({
+  text,
+  className = ''
+}: SuggestionsSidebarProps) {
+  const [activeTab, setActiveTab] = useState('traditional')
+
+  // Editor store for content updates
+  const { content, setContent } = useEditorStore()
+
+  // Suggestions store for dismissing applied suggestions
+  const { dismissSuggestion } = useSuggestionsStore()
+
+  // Convert HTML content to plain text for analysis
+  const plainTextContent = useMemo(() => {
+    const { text: plainText } = htmlToPlainText(text);
+    console.log('📄 HTML to plain text conversion:', { 
+      htmlLength: text.length, 
+      plainLength: plainText.length,
+      html: text.substring(0, 100),
+      plain: plainText.substring(0, 100)
+    });
+    return plainText;
+  }, [text]);
+
+  // Traditional grammar/spelling analysis using plain text
   const {
-    suggestions,
-    isAnalyzing,
-    error,
-    activeTab,
-    setActiveTab,
-    dismissSuggestion,
-    clearAllSuggestions,
-    getFilteredSuggestions
-  } = useSuggestionsStore();
+    suggestions: traditionalSuggestions,
+    isAnalyzing: isTraditionalLoading,
+    error: traditionalError,
+    triggerAnalysis: analyzeTraditional
+  } = useWritingAnalysis(plainTextContent, true)
 
-  const { content, setContent } = useEditorStore();
+  // AI-powered suggestions - simplified for now
+  const totalAISuggestions = 0;
 
-  const tabs = [
-    { id: 'grammar' as const, label: 'Grammar', count: suggestions.filter(s => s.type === 'grammar').length },
-    { id: 'style' as const, label: 'Style', count: suggestions.filter(s => s.type === 'style').length },
-    { id: 'content' as const, label: 'Content', count: suggestions.filter(s => s.type === 'content').length },
-    { id: 'tone' as const, label: 'Tone', count: suggestions.filter(s => s.type === 'tone').length },
-  ];
+  // Filter traditional suggestions (grammar/spelling only)
+  const grammarSpellingSuggestions = useMemo(() => 
+    traditionalSuggestions.filter(s => ['grammar', 'spelling'].includes(s.type)),
+    [traditionalSuggestions]
+  )
 
-  const filteredSuggestions = getFilteredSuggestions();
+  // Combined stats
+  const totalTraditionalSuggestions = grammarSpellingSuggestions.length
+  const totalSuggestions = totalTraditionalSuggestions + totalAISuggestions
 
-  const getTypeIcon = (suggestion: { id?: string; type?: string }) => {
-    // Check if it's a spelling suggestion based on ID
-    if (suggestion.id?.startsWith('spelling-')) {
-      return '🔤';
+  const handleApplyTraditionalSuggestion = (suggestion: Suggestion) => {
+    try {
+      // Apply the suggestion to the current editor content
+      const newContent = applySuggestion(suggestion, content);
+      
+      // Update the editor with the new content
+      setContent(newContent);
+      
+      // Remove the applied suggestion from the list
+      dismissSuggestion(suggestion.id);
+      
+      console.log('✅ Applied suggestion:', suggestion.message);
+    } catch (error) {
+      console.error('❌ Failed to apply suggestion:', error);
     }
-    
-    switch (suggestion.type) {
-      case 'grammar': return '📝';
-      case 'style': return '✨';
-      case 'content': return '💡';
-      case 'tone': return '🎭';
-      default: return '💭';
-    }
-  };
+  }
 
-  // Handle applying a suggestion
-  const handleApplySuggestion = (suggestion: { 
-    id: string; 
-    position?: { start: number; end: number }; 
-    suggested?: string 
-  }) => {
-    if (!suggestion.position || !suggestion.suggested) {
-      console.warn('Cannot apply suggestion: missing position or suggested text');
-      return;
-    }
-
-    const { start, end } = suggestion.position;
-    const newContent = 
-      content.slice(0, start) + 
-      suggestion.suggested + 
-      content.slice(end);
-    
-    setContent(newContent);
-    dismissSuggestion(suggestion.id);
-  };
+  const handleRefreshTraditional = () => {
+    analyzeTraditional()
+  }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-neutral-900">
-            Writing Assistant
-          </h2>
-          {suggestions.length > 0 && (
-            <button
-              onClick={clearAllSuggestions}
-              className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors duration-75"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
-
-        {/* Tabs - 2x2 Grid */}
-        <div className="grid grid-cols-2 gap-2 bg-neutral-100 p-2 rounded-lg">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 text-center ${
-                activeTab === tab.id
-                  ? 'bg-white text-neutral-900 shadow-sm'
-                  : 'text-neutral-600 hover:text-neutral-900'
-              }`}
-            >
-              <div className="flex flex-col items-center space-y-1">
-                <span className="font-medium">{tab.label}</span>
-                {tab.count > 0 && (
-                  <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs ${
-                    activeTab === tab.id
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'bg-neutral-200 text-neutral-600'
-                  }`}>
-                    {tab.count}
-                  </span>
-                )}
-              </div>
-            </button>
-          ))}
-        </div>
+    <div className={`h-full flex flex-col ${className}`}>
+      <div className="p-4 border-b">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          Writing Assistant
+        </h2>
+        {totalSuggestions > 0 && (
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">
+              {totalSuggestions} suggestion{totalSuggestions !== 1 ? 's' : ''}
+            </Badge>
+            {totalTraditionalSuggestions > 0 && (
+              <Badge variant="outline" className="text-xs">
+                {totalTraditionalSuggestions} traditional
+              </Badge>
+            )}
+            {totalAISuggestions > 0 && (
+              <Badge variant="outline" className="text-xs">
+                {totalAISuggestions} AI
+              </Badge>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="mx-4 mt-2 p-3 bg-error-50 border border-error-200 rounded">
-          <p className="text-sm text-error-700 leading-relaxed">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="text-xs text-error-600 hover:text-error-800 mt-1 transition-colors duration-75"
-          >
-            Try again
-          </button>
-        </div>
-      )}
+      <div className="flex-1 overflow-hidden">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="h-full flex flex-col"
+        >
+          <TabsList className="grid w-full grid-cols-2 mx-4 mt-4">
+            <TabsTrigger value="traditional" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Grammar & Spelling
+              {totalTraditionalSuggestions > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 text-xs">
+                  {totalTraditionalSuggestions}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              AI Assistant
+              {totalAISuggestions > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 text-xs">
+                  {totalAISuggestions}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Loading State */}
-        {isAnalyzing && (
-          <div className="p-6 text-center">
-            <div className="text-neutral-500 animate-pulse-subtle">Analyzing your writing...</div>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!isAnalyzing && !error && filteredSuggestions.length === 0 && (
-          <div className="p-6 text-center">
-            <div className="text-neutral-400 mb-2">✨</div>
-            <p className="text-sm text-neutral-600">
-              {suggestions.length === 0 
-                ? "Start typing to get writing suggestions"
-                : `No ${activeTab} suggestions`
-              }
-            </p>
-          </div>
-        )}
-
-        {/* Suggestions List */}
-        {!isAnalyzing && !error && filteredSuggestions.length > 0 && (
-          <div className="p-6 space-y-4">
-            {filteredSuggestions.map((suggestion) => (
-              <div
-                key={suggestion.id}
-                className="sleek-card rounded-xl p-5 hover:shadow-soft-lg transition-all duration-200 hover:-translate-y-0.5"
-              >
-                {/* Suggestion Header */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">{getTypeIcon(suggestion)}</span>
-                    <div>
-                      <p className="text-sm font-medium text-neutral-900 capitalize">
-                        {suggestion.id?.startsWith('spelling-') ? 'Spelling' : suggestion.type}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => dismissSuggestion(suggestion.id)}
-                    className="text-neutral-400 hover:text-neutral-600 p-1 transition-colors duration-75"
-                    title="Dismiss"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Suggestion Content */}
-                <div className="space-y-3">
-                  <p className="text-sm text-neutral-700 leading-relaxed">
-                    {suggestion.description}
-                  </p>
-
-                  {/* Original Text */}
-                  {suggestion.original && (
-                    <div className="bg-error-50 border border-error-200 rounded-lg p-3">
-                      <p className="text-xs font-medium text-error-800 mb-1">Current:</p>
-                      <p className="text-sm text-error-700 font-mono">
-                        "{suggestion.original}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Suggested Text */}
-                  {suggestion.suggested && (
-                    <div className="bg-success-50 border border-success-200 rounded-lg p-3">
-                      <p className="text-xs font-medium text-success-800 mb-1">Suggested:</p>
-                      <p className="text-sm text-success-700 font-mono">
-                        "{suggestion.suggested}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2 pt-2">
-                    {suggestion.suggested && (
-                      <button
-                        onClick={() => handleApplySuggestion(suggestion)}
-                        className="sleek-button-secondary text-xs px-3 py-1.5 rounded-lg hover:shadow-soft transition-all duration-200"
-                      >
-                        Apply
-                      </button>
-                    )}
-                    <button
-                      onClick={() => dismissSuggestion(suggestion.id)}
-                      className="text-xs text-neutral-500 hover:text-neutral-700 px-3 py-1.5 transition-colors duration-75"
+          <div className="flex-1 overflow-auto">
+            <TabsContent value="traditional" className="p-4 space-y-4 h-full">
+              {/* Traditional suggestions header */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">
+                      Grammar & Spelling
+                    </CardTitle>
+                    <Button
+                      onClick={handleRefreshTraditional}
+                      disabled={isTraditionalLoading}
+                      size="sm"
+                      variant="outline"
                     >
-                      Dismiss
-                    </button>
+                      <RefreshCw className={`w-4 h-4 ${isTraditionalLoading ? 'animate-spin' : ''}`} />
+                    </Button>
                   </div>
-                </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {traditionalError && (
+                    <div className="text-sm text-red-600 mb-2">
+                      Error: {traditionalError}
+                    </div>
+                  )}
+                  {isTraditionalLoading && (
+                    <div className="text-sm text-gray-600">
+                      Analyzing grammar and spelling...
+                    </div>
+                  )}
+                  {!isTraditionalLoading && totalTraditionalSuggestions === 0 && (
+                    <div className="text-sm text-gray-600">
+                      No grammar or spelling issues detected.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Traditional suggestions list */}
+              {grammarSpellingSuggestions.map((suggestion) => (
+                <TraditionalSuggestionItem
+                  key={suggestion.id}
+                  suggestion={suggestion}
+                  onApply={handleApplyTraditionalSuggestion}
+                />
+              ))}
+            </TabsContent>
+
+            <TabsContent value="ai" className="p-4 h-full">
+              <div className="text-center text-neutral-500">
+                <p>AI suggestions coming soon!</p>
               </div>
-            ))}
+            </TabsContent>
           </div>
-        )}
+        </Tabs>
       </div>
     </div>
-  );
+  )
 } 

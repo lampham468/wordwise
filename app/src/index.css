@@ -126,6 +126,16 @@ body {
   background-color: theme('colors.neutral.400');
 }
 
+/* Hide scrollbar utility class for seamless scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
 /* Selection styling */
 ::selection {
   background-color: theme('colors.primary.200');
@@ -263,17 +273,15 @@ a {
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
-/* TipTap Editor Styles - using theme colors */
+/* TipTap Editor Styles - Compact scrollable editor */
 .ProseMirror {
   outline: none;
-  font-family: theme('fontFamily.sans');
-  font-size: 16px;
-  line-height: 1.6;
-  color: theme('colors.neutral.900');
-  /* Prevent layout shifts */
-  min-height: 500px;
-  height: 100%;
-  overflow-y: auto;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #333;
+  padding: 0.5rem;
+  min-height: 150px;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -348,15 +356,18 @@ a {
   border-radius: 0;
 }
 
-/* Spell check underlines - following theme-rules.md patterns */
+/* Spell check underlines - using solid colors for visibility */
 .spell-error {
-  border-bottom: 2px wavy theme('colors.error.500');
+  border-bottom: 2px wavy #ef4444 !important;
+  cursor: pointer;
 }
 
 .grammar-error {
-  border-bottom: 2px dashed theme('colors.warning.500');
+  border-bottom: 2px dashed #f59e0b !important;
+  cursor: pointer;
 }
 
 .style-suggestion {
-  border-bottom: 2px dotted theme('colors.primary.500');
+  border-bottom: 2px dotted #0ea5e9 !important;
+  cursor: pointer;
 }

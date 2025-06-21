@@ -6,7 +6,7 @@
  */
 
 import writeGood from 'write-good';
-import type { Suggestion } from '@/types/suggestions';
+import type { Suggestion, SuggestionCategory } from '@/types/suggestions';
 
 /**
  * Configuration for grammar checking
@@ -79,16 +79,28 @@ export function analyzeGrammar(text: string, config: GrammarConfig = DEFAULT_CON
     
     // Convert to our Suggestion format
     return results.map((result, index) => {
+      // Map write-good reasons to our categories
+      const getCategoryFromReason = (reason: string): SuggestionCategory => {
+        const lowerReason = reason.toLowerCase();
+        if (lowerReason.includes('passive voice')) return 'passive-voice';
+        if (lowerReason.includes('weasel')) return 'weasel-words';
+        if (lowerReason.includes('adverb')) return 'adverb-weakening';
+        if (lowerReason.includes('wordy')) return 'too-wordy';
+        if (lowerReason.includes('cliche')) return 'cliches';
+        return 'general';
+      };
+
       const suggestion: Suggestion = {
         id: `grammar-${Date.now()}-${index}`,
         type: 'grammar' as const,
-        title: 'Grammar Issue',
-        description: result.reason || 'Grammar issue detected',
+        category: getCategoryFromReason(result.reason || ''),
+        message: result.reason || 'Grammar issue detected',
         original: text.substring(result.index, result.index + result.offset),
         position: {
           start: result.index,
           end: result.index + result.offset,
         },
+        engine: 'write-good',
       };
       
       return suggestion;
@@ -149,7 +161,7 @@ export function applyGrammarSuggestion(suggestion: Suggestion, text: string): st
   }
   
   // Otherwise, try to generate a suggestion based on the issue type
-  const suggestions = getGrammarSuggestions(suggestion.original, suggestion.description);
+  const suggestions = getGrammarSuggestions(suggestion.original, suggestion.message);
   if (suggestions.length > 0) {
     return before + suggestions[0] + after;
   }

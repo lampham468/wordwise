@@ -5,7 +5,7 @@
  * Converts spell check results to our internal Suggestion format.
  */
 
-import type { Suggestion } from '@/types/suggestions';
+import type { Suggestion, SuggestionCategory } from '@/types/suggestions';
 
 /**
  * Configuration for spell checking
@@ -111,20 +111,21 @@ export async function analyzeSpelling(text: string): Promise<Suggestion[]> {
   try {
     console.log('🔍 Analyzing spelling for text:', text.substring(0, 50) + '...');
     const results: SpellWorkerResult[] = await checkTextWithWorker(text);
-    console.log('📝 Spell check results:', results);
+    console.log('📝 Spell check results:', results.length, 'errors found:', results);
     
     // Convert to our Suggestion format
     return results.map((result, index) => {
       const suggestion: Suggestion = {
         id: `spelling-${Date.now()}-${index}`,
-        type: 'grammar' as const, // Using 'grammar' type as spelling is part of grammar
-        title: 'Spelling Error',
-        description: `"${result.word}" may be misspelled`,
+        type: 'spelling' as const,
+        category: 'spelling-error' as SuggestionCategory,
+        message: `"${result.word}" may be misspelled`,
         original: result.word,
         position: {
           start: result.index,
           end: result.index + result.length,
         },
+        engine: 'nspell',
       };
       
       // Add suggestion if available
